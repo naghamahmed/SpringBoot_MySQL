@@ -47,5 +47,5 @@ spec:
             claimName: {{ .Release.Name }}-mysql-pvc
         - name: mysql-queries-volume
           configMap:
-            name: {{ include "mysql.fullname" . }}-queries
+            name: sql-queries-configmap
 

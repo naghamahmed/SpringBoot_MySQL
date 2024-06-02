@@ -2,6 +2,7 @@ replicaCount: 1
 
 mysql:
   databaseName: mysql
+  fullname: mysql
 
 springApp:
   image:

@@ -1,93 +1,141 @@
-# Spring Mysql
+# SpringBootApp
+
+Mysql and SpringBoot app deployed on minikube cluster, 
+Deployed the App through Helm Charts with GitLab CI
+- Bulding SpringBoot images.
+- Pushing image to Nexus Docker Repositaries. 
+- Using GitLab-ci for building and deploying
+- Using Helm Chart to deploy the app on minikube
+
+# Project Component
+
+- OS Ubuntu 24.04
+- minikube v1.33.1
+- Docker version 26.1.3
+- ansible [core 2.16.7]
+- GitLab CC
+- Nexus3
+- Helm v3
+
+# Infrastructure
+
+- Installing Docker
+- Installing minikube
+- Installing Ansible
+- Installing Nexus using Ansible
+- Installing Helm
+
+# minikube Installation
 
 
-
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+1) Update Your System
 
 ```
-cd existing_repo
-git remote add origin http://gitlab.com/root/spring-mysql.git
-git branch -M main
-git push -uf origin main
+sudo apt update
 ```
 
-## Integrate with your tools
+```
+sudo apt upgrade -y
+```
+2) Install Docker
 
-- [ ] [Set up project integrations](http://gitlab.com/root/spring-mysql/-/settings/integrations)
+```
+sudo apt install ca-certificates curl gnupg wget apt-transport-https -y
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+```
 
-## Collaborate with your team
+```
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+Add your local user to docker group so that your local user run docker commands without sudo.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+```
+sudo usermod -aG docker $USER
+newgrp docker
+```
+3) Download and Install Minikube Binary
 
-## Test and Deploy
+```
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+```
 
-Use the built-in continuous integration in GitLab.
+To verify the minikube version, run
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```
+minikube version
+```
 
-***
+4) Install Kubectl tool
 
-# Editing this README
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```
+curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+```
+```
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+```
 
-## Suggestions for a good README
+5) Start Minikube Cluster
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```
+minikube start --driver=docker
+```
+5) Installing Helm
 
-## Name
-Choose a self-explaining name for your project.
+```
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+# Applying Ansible (IAC)
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Due to Specification of minikube rather than installing Nexus as a pod, Nuxus will be installed as a service using Ansible
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```
+ansible-playbook Nexus-Ansible/nexus.yaml
+```
+accessing Nexus through url
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```
+localhost:8081
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Creating Docker repo (docker-repo)
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+# Gitlab server and Runner
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+- Installing Docker Compose
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+```
+sudo yum install docker-compose-plugin
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```
+docker compose up
+```
+Acessing GitLab Server through url
 
-## License
-For open source projects, say how it is licensed.
+```
+localhost:80
+```
+- Creating Group and project within the group
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+# Configuring GitLab Runner
+
+Creating instance runner in GitLab server and add the token through exec  GitLab runner container
+
+```  
+docker exec -it gitlab-runner gitlab-runner register --docker-privileged
+```
