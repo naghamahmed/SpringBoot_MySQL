@@ -5,7 +5,7 @@ mysql:
 
 springApp:
   image:
-    repository: spring-app
+    repository: localhost:8081/repository/docker-repo/toystore
     pullPolicy: IfNotPresent
     tag: latest
 
