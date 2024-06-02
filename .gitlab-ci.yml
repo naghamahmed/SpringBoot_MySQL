@@ -1,0 +1,32 @@
+
+stages:
+  - build
+  - dockerize
+
+variables:
+  NEXUS_REPO_URL: "localhost:8081/repository/docker-repo/"
+  DOCKER_IMAGE_NAME: "toystore"
+  DOCKER_IMAGE_TAG: "latest"
+
+
+build:
+  stage: build
+  before_script:
+  - cd Toy0Store
+  script:
+    - mvn clean install
+  artifacts:
+    paths:
+      - target/*.jar
+    
+
+build:
+  stage: dockerize
+  image: docker:19.03.12
+  services:
+    - docker:19.03.12-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY #stored as variables in GitLab
+    - docker build -t $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG .
+    - docker tag $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG $NEXUS_REPO_URL$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+    - docker push $NEXUS_REPO_URL$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG

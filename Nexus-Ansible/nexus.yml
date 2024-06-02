@@ -1,0 +1,5 @@
+- hosts: all
+  remote_user: nagham
+  become: yes
+  roles:
+    - install-nexus

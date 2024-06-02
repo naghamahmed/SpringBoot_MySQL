@@ -1,0 +1,63 @@
+---
+- name: apt update
+  apt:
+    update_cache: yes
+
+- name: Install wget and java
+  apt:
+    name:
+      - wget
+      - openjdk-8-jdk
+    state: present
+
+- name: make directory 
+  file:
+    path: "{{ path }}"
+    state: directory    
+
+- name: Download nexus
+  get_url:
+    url: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+    dest: "{{ path }}/nexus.tar.gz"
+
+- name: Unarchieve nexus
+  unarchive:
+    src: "{{ path }}/nexus.tar.gz"
+    dest: "{{ path }}"
+    remote_src: yes
+
+- name: Rename nexus
+  command: "mv {{ path }}/nexus-3.68.1-02 {{ path }}/nexus"
+
+- name: Create nexus user
+  user:
+    name: nexus
+
+- name: Change file ownership, group and permissions
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    owner: nexus
+    group: nexus
+  with_items:
+    - "{{ path }}/nexus"
+    - "{{ path }}/sonatype-work"
+
+- name: Run_as_nexus_user
+  lineinfile:
+    path: "{{ path }}/nexus/bin/nexus.rc"
+    regexp: '^#run_as_user=""'
+    line: run_as_user="nexus"
+
+
+- name: Copy file
+  template:
+    src: nexus.service
+    dest: /etc/systemd/system/nexus.service
+
+- name: Enable and start service nexus
+  service:
+    name: nexus
+    state: started
+    enabled: yes

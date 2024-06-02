@@ -1,0 +1,40 @@
+choose_environment:
+  stage: deploy
+  script:
+    - echo "Choose the environment:"
+    - echo "1. Dev"
+    - echo "2. Test"
+    - read -p "Enter your choice [1 or 2]: " choice
+    - case $choice in
+        1)
+          ENVIRONMENT="Dev"
+          ;;
+        2)
+          ENVIRONMENT="Test"
+          ;;
+        *)
+          echo "Invalid choice. Please enter 1 or 2."
+          exit 1
+          ;;
+      esac
+    - echo "Selected environment: $ENVIRONMENT"
+
+deploy_to_dev:
+  stage: deploy
+  script:
+    - echo "Deploying Spring Boot application to Dev namespace"
+    - helm upgrade --install my-spring-app-dev ./chart --set environment=Dev --namespace Dev
+  rules:
+    - if: '$ENVIRONMENT == "Dev"'
+  dependencies:
+    - choose_environment
+
+deploy_to_test:
+  stage: deploy
+  script:
+    - echo "Deploying Spring Boot application to Test namespace"
+    - helm upgrade --install my-spring-app-test ./chart --set environment=Test --namespace Test
+  rules:
+    - if: '$ENVIRONMENT == "Test"'
+  dependencies:
+    - choose_environment
