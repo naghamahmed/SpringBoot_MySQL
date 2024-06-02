@@ -89,6 +89,12 @@ sudo mv kubectl /usr/local/bin/
 ```
 minikube start --driver=docker
 ```
+Creating two ns dev,test in the cluster
+
+```
+kubectl create ns dev
+kubectl create ns test
+```
 5) Installing Helm
 
 ```

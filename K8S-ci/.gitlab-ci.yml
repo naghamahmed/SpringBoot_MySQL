@@ -23,7 +23,7 @@ deploy_to_dev:
   stage: deploy
   script:
     - echo "Deploying Spring Boot application to Dev namespace"
-    - helm upgrade --install my-spring-app-dev ./chart --set environment=Dev --namespace Dev
+    - helm upgrade --install my-spring-app-dev ./chart --set environment=Dev --namespace dev
   rules:
     - if: '$ENVIRONMENT == "Dev"'
   dependencies:
@@ -33,7 +33,7 @@ deploy_to_test:
   stage: deploy
   script:
     - echo "Deploying Spring Boot application to Test namespace"
-    - helm upgrade --install my-spring-app-test ./chart --set environment=Test --namespace Test
+    - helm upgrade --install my-spring-app-test ./chart --set environment=Test --namespace test
   rules:
     - if: '$ENVIRONMENT == "Test"'
   dependencies:
