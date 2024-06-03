@@ -119,6 +119,9 @@ localhost:8081
 
 Creating Docker repo (docker-repo)
 
+# Configuring Docker registry in Helm Chart
+
+creating .dockerconfigjson with nexus credentials for image pull secret
 
 # Gitlab server and Runner
 

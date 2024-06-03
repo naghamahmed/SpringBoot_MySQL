@@ -31,3 +31,5 @@ spec:
                   secretKeyRef:
                     name: {{ .Release.Name }}-mysql-password
                     key: password
+      imagePullSecrets:
+        - name: nexus-registry-secret      
