@@ -117,7 +117,14 @@ accessing Nexus through url
 localhost:8081
 ```
 
-Creating Docker repo (docker-repo)
+Creating hosted docker repo on port 8082
+
+Adding /etc/docker/daemon.json to allow pushing images to insecure registry
+
+```
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
 
 # Configuring Docker registry in Helm Chart
 
