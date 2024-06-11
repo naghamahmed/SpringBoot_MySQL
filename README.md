@@ -128,7 +128,11 @@ sudo systemctl restart docker
 
 # Configuring Docker registry in Helm Chart
 
-creating .dockerconfigjson with nexus credentials for image pull secret
+creating .dockerconfigjson with nexus credentials for image pull secret or using cli
+
+```
+kubectl create secret docker-registry nexus-registry-secret --docker-server=localhost:8082 --docker-username=<your-name> --docker-password=<your-password> --docker-email=<your-email>
+```
 
 # Gitlab server and Runner
 
